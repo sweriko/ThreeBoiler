@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js WebGPU + Rapier Boilerplate</title>
+    <style>
+      html, body { height: 100%; }
+      body { margin: 0; overflow: hidden; background: #000; }
+      #app { position: relative; width: 100%; height: 100%; }
+      /* Stats container top-left */
+      #stats { position: fixed; top: 0; left: 0; display: flex; flex-direction: column; gap: 0; z-index: 1000; }
+      /* Ensure each stats panel has no gaps */
+      .stats-panel { position: static !important; margin: 0 !important; padding: 0 !important; }
+      /* Dedicated GUI mount pinned right */
+      #gui { position: fixed; top: 0; right: 0; z-index: 1001; }
+      /* Pointer lock hint */
+      #hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: #fff; font: 12px/1.4 system-ui, sans-serif; opacity: 0.6; letter-spacing: .2px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="stats"></div>
+    <div id="gui"></div>
+    <div id="hint">Click canvas to lock pointer. WASD to move, Space jump, Shift sprint, F fly.</div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+  </html>
+
+
