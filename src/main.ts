@@ -4,6 +4,7 @@ import { Physics } from './core/Physics';
 import { loadHDRI } from './utils/Environment';
 import { createGround } from './world/ground';
 import { FPSController, FPSControllerOptions } from './controllers/FPSController';
+import { ShockRingManager } from './effects/ShockRing';
 
 const root = document.getElementById('app') as HTMLDivElement;
 const app = await App.create(root);
@@ -39,6 +40,21 @@ const controllerOptions: FPSControllerOptions = {
 };
 const controller = new FPSController(physics.world, app.camera, app.renderer.domElement, controllerOptions);
 controller.enableDebugMesh(app.scene, false);
+
+// Shock rings
+const shockRings = new ShockRingManager(app.scene, app.camera);
+app.renderer.domElement.addEventListener('mousedown', (e: MouseEvent) => {
+  if (e.button !== 0) return;
+  shockRings.spawn({
+    lifeSeconds: 2.4,
+    startRadius: 0.7,
+    endRadius: 6.0,
+    thickness: 0.03,
+    moveSpeed: 4.0,
+    opacity: 0.95,
+    color: 0xe8eef9,
+  });
+});
 
 // GUI
 const lightParams = { directionX: 5, directionY: 10, directionZ: 5, intensity: 3.0, exposure: 1.0, envBackground: true };
@@ -88,6 +104,7 @@ app.addUpdater((dt) => {
     controller.updateAfterPhysics();
     accumulator -= fixedStep;
   }
+  shockRings.update(dt);
 });
 app.start();
 
