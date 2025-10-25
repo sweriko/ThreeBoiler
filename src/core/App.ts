@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import Stats from 'stats.js';
 import { GUI } from 'lil-gui';
+import { LAYERS } from './Layers';
 
 export type UpdateFn = (delta: number) => void;
 
@@ -39,6 +40,7 @@ export class App {
     await renderer.init();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.autoClear = true;
     renderer.toneMapping = opts.toneMapping ?? THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = opts.exposure ?? 1.0;
     root.appendChild(renderer.domElement);
@@ -85,7 +87,20 @@ export class App {
 
       const delta = Math.min(0.033, this.clock.getDelta());
       for (const fn of this.updaters) fn(delta);
+      // First pass: world (layer 0) with background (autoClear handles clears + skybox)
+      this.camera.layers.set(LAYERS.WORLD);
       this.renderer.render(this.scene, this.camera);
+
+      // Second pass: overlay (layer 1) on top; keep color, reset depth and suppress background
+      const prevAuto = this.renderer.autoClear;
+      const prevBg = this.scene.background;
+      this.scene.background = null;
+      this.renderer.autoClear = false;
+      this.renderer.clearDepth();
+      this.camera.layers.set(LAYERS.OVERLAY);
+      this.renderer.render(this.scene, this.camera);
+      this.scene.background = prevBg;
+      this.renderer.autoClear = prevAuto;
 
       for (const s of this.stats) s.end();
       requestAnimationFrame(animate);

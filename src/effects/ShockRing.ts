@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { Fn, If, Break, float, vec2, vec3, vec4, smoothstep, texture3D, uniform } from 'three/tsl';
 import { RaymarchingBox } from 'three/examples/jsm/tsl/utils/Raymarching.js';
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
+import { LAYERS } from '../core/Layers';
 
 export interface ShockRingOptions {
   color?: THREE.ColorRepresentation;
@@ -166,6 +167,7 @@ export class ShockRing {
     // Simple unit cube; world scale defines the volume bounds
     const geo = new THREE.BoxGeometry(1, 1, 1);
     this.mesh = new THREE.Mesh(geo, material);
+    this.mesh.layers.set(LAYERS.OVERLAY);
 
     // Spawn in front of camera, facing the same direction (local +Z == camera forward)
     const spawnDir = new THREE.Vector3();
