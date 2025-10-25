@@ -276,6 +276,7 @@ export class ShockRingManager {
   private readonly camera: THREE.Camera;
   private readonly rings: ShockRing[] = [];
   private readonly pending: { delay: number; opts: ShockRingOptions }[] = [];
+  private maxRings = 100;
   public readonly params = {
     lifeSeconds: 7.2,
     startRadius: 4.2,
@@ -299,7 +300,12 @@ export class ShockRingManager {
     this.camera = camera;
   }
 
-  spawn(opts: ShockRingOptions = {}): ShockRing {
+  spawn(opts: ShockRingOptions = {}): ShockRing | null {
+    // Check max ring limit
+    if (this.rings.length >= this.maxRings) {
+      return null;
+    }
+    
     const p = this.params;
     const ring = new ShockRing(this.camera, {
       lifeSeconds: opts.lifeSeconds ?? p.lifeSeconds,
@@ -417,6 +423,25 @@ export class ShockRingManager {
       growthExponent: 2.0,
       growthDelay: 0.05,
     });
+  }
+
+  public getActiveCount(): number {
+    return this.rings.length;
+  }
+
+  public setMaxRings(max: number): void {
+    this.maxRings = Math.max(1, Math.floor(max));
+  }
+
+  public clearAll(): void {
+    // Dispose all active rings
+    for (const ring of this.rings) {
+      ring.dispose(this.scene);
+    }
+    this.rings.length = 0;
+    
+    // Clear pending spawns
+    this.pending.length = 0;
   }
 }
 
