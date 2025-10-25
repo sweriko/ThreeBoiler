@@ -45,15 +45,7 @@ controller.enableDebugMesh(app.scene, false);
 const shockRings = new ShockRingManager(app.scene, app.camera);
 app.renderer.domElement.addEventListener('mousedown', (e: MouseEvent) => {
   if (e.button !== 0) return;
-  shockRings.spawn({
-    lifeSeconds: 2.4,
-    startRadius: 0.7,
-    endRadius: 6.0,
-    thickness: 0.03,
-    moveSpeed: 4.0,
-    opacity: 0.95,
-    color: 0xe8eef9,
-  });
+  shockRings.spawnAssembly();
 });
 
 // GUI
@@ -90,6 +82,27 @@ fCtrl.add(ctrlParams, 'smoothingTime', 0, 0.3, 0.005).onChange((v: number) => co
 fCtrl.add(ctrlParams, 'invertY').onChange((v: boolean) => controller.setInvertY(v));
 fCtrl.add({ toggleFly: () => controller.setFlyMode(!(controller as any).isFlyModeEnabled()) }, 'toggleFly').name('Toggle Fly (F)');
 fCtrl.close();
+
+// Shock Ring Controls
+const fRing = app.gui.addFolder('Shock Ring');
+const ringParams = shockRings.params;
+fRing.add(ringParams, 'lifeSeconds', 0.3, 20.0, 0.05).name('Life (s)');
+fRing.add(ringParams, 'startRadius', 0.05, 4.0, 0.01).name('Start Radius');
+fRing.add(ringParams, 'endRadius', 0.2, 20.0, 0.1).name('End Radius');
+fRing.add(ringParams, 'thickness', 0.0003, 0.05, 0.0001).name('Thickness');
+fRing.add(ringParams, 'moveSpeed', 0.0, 10.0, 0.1).name('Move Speed');
+fRing.addColor(ringParams, 'color').name('Color');
+fRing.add(ringParams, 'opacity', 0.05, 1.0, 0.01).name('Opacity');
+fRing.add(ringParams, 'steps', 40, 220, 1).name('Steps');
+fRing.add(ringParams, 'softness', 0.001, 0.2, 0.001).name('Softness');
+fRing.add(ringParams, 'noiseScale', 0.2, 6.0, 0.1).name('Noise Scale');
+fRing.add(ringParams, 'spawnDistance', 0.0, 5.0, 0.05).name('Spawn Dist');
+fRing.add(ringParams, 'fadeStart', 0.0, 0.95, 0.01).name('Fade Start');
+fRing.add(ringParams, 'fadeEnd', 0.05, 0.99, 0.01).name('Fade End');
+fRing.add(ringParams, 'growthDelay', 0.0, 0.9, 0.01).name('Growth Delay');
+fRing.add(ringParams, 'growthExponent', 0.1, 12.0, 0.1).name('Growth Expo');
+fRing.add({ spawn: () => shockRings.spawnAssembly() }, 'spawn').name('Spawn Assembly');
+fRing.close();
 
 // Update loop with fixed-step physics
 let accumulator = 0;
