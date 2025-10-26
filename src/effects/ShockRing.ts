@@ -117,9 +117,9 @@ export class ShockRing {
     const noiseTexNode = texture3D(getSharedNoise3D(), null, 0);
 
     // Raymarch in unit cube in object space. Torus axis aligned with +Z.
-    const torusRaymarch = Fn(({ noiseTex, steps = float(110) }) => {
+    const torusRaymarch = Fn((builder) => {
       const finalColor = vec4(0).toVar();
-      RaymarchingBox(steps, ({ positionRay }) => {
+      RaymarchingBox(this.uniforms.steps, ({ positionRay }) => {
         // Torus SDF (axis Z): q = (length(xy) - R, z)
         const rxy = vec2(positionRay.x, positionRay.y).length();
         const q = vec2(rxy.sub(this.uniforms.Rmajor), positionRay.z);
@@ -129,7 +129,7 @@ export class ShockRing {
         const shell = smoothstep(float(0.0), this.uniforms.range, dist.abs()).oneMinus();
 
         // Noise modulation
-        const n = float(noiseTex.sample(positionRay.mul(this.uniforms.noiseScale).add(0.5)).r);
+        const n = float(this.uniforms.noiseTex.sample(positionRay.mul(this.uniforms.noiseScale).add(0.5)).r);
         const density = shell.mul(n.mul(1.8));
 
         // Simple shading tint
@@ -156,7 +156,7 @@ export class ShockRing {
       noiseTex: noiseTexNode,
     };
 
-    const ringRGBA = torusRaymarch({ noiseTex: noiseTexNode, steps: stepsU });
+    const ringRGBA = torusRaymarch();
     const material = new THREE.NodeMaterial();
     material.colorNode = ringRGBA;
     material.transparent = true;
@@ -238,7 +238,8 @@ export class ShockRing {
     const fadeT = t <= fadeStart ? 1.0 : (t >= fadeEnd ? 0.0 : 1.0 - (t - fadeStart) / denom);
     this.uniforms.fade.value = Math.max(0, Math.min(1, fadeT));
 
-    if (this.age >= this.lifeSeconds || this.uniforms.fade.value <= 0.01) {
+    const fadeVal = Number((this.uniforms.fade as any).value);
+    if (this.age >= this.lifeSeconds || fadeVal <= 0.01) {
       this.alive = false;
     }
   }
