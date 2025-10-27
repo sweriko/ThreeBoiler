@@ -4,7 +4,7 @@ import { Physics } from './core/Physics';
 import { loadHDRI } from './utils/Environment';
 import { createGround } from './world/ground';
 import { FPSController, FPSControllerOptions } from './controllers/FPSController';
-import { ShockRingManager } from './effects/ShockRing';
+import { IcoRingsManager } from './effects/IcoRing';
 
 const root = document.getElementById('app') as HTMLDivElement;
 const app = await App.create(root);
@@ -41,11 +41,11 @@ const controllerOptions: FPSControllerOptions = {
 const controller = new FPSController(physics.world, app.camera, app.renderer.domElement, controllerOptions);
 controller.enableDebugMesh(app.scene, false);
 
-// Shock rings
-const shockRings = new ShockRingManager(app.scene, app.camera);
+// Ico rings
+const icoRings = new IcoRingsManager(app.scene, app.camera);
 app.renderer.domElement.addEventListener('mousedown', (e: MouseEvent) => {
   if (e.button !== 0) return;
-  shockRings.spawnAssembly();
+  icoRings.spawnAssembly();
 });
 
 // GUI
@@ -83,25 +83,29 @@ fCtrl.add(ctrlParams, 'invertY').onChange((v: boolean) => controller.setInvertY(
 fCtrl.add({ toggleFly: () => controller.setFlyMode(!(controller as any).isFlyModeEnabled()) }, 'toggleFly').name('Toggle Fly (F)');
 fCtrl.close();
 
-// Shock Ring Controls
-const fRing = app.gui.addFolder('Shock Ring');
-const ringParams = shockRings.params;
+// Ico Rings Controls
+const fRing = app.gui.addFolder('Ico Rings');
+const ringParams = icoRings.params;
 fRing.add(ringParams, 'lifeSeconds', 0.3, 20.0, 0.05).name('Life (s)');
-fRing.add(ringParams, 'startRadius', 0.05, 4.0, 0.01).name('Start Radius');
-fRing.add(ringParams, 'endRadius', 0.2, 20.0, 0.1).name('End Radius');
-fRing.add(ringParams, 'thickness', 0.0003, 0.05, 0.0001).name('Thickness');
-fRing.add(ringParams, 'moveSpeed', 0.0, 10.0, 0.1).name('Move Speed');
-fRing.addColor(ringParams, 'color').name('Color');
-fRing.add(ringParams, 'opacity', 0.05, 1.0, 0.01).name('Opacity');
-fRing.add(ringParams, 'steps', 40, 220, 1).name('Steps');
-fRing.add(ringParams, 'softness', 0.001, 0.2, 0.001).name('Softness');
-fRing.add(ringParams, 'noiseScale', 0.2, 6.0, 0.1).name('Noise Scale');
-fRing.add(ringParams, 'spawnDistance', 0.0, 5.0, 0.05).name('Spawn Dist');
+fRing.add(ringParams, 'startRadius', 0.05, 6.0, 0.01).name('Start Radius');
+fRing.add(ringParams, 'endRadius', 0.2, 30.0, 0.1).name('End Radius');
+fRing.add(ringParams, 'moveSpeed', -10.0, 10.0, 0.1).name('Move Speed');
+fRing.add(ringParams, 'count', 10, 300, 1).name('Count');
+fRing.add(ringParams, 'detail', 0, 5, 1).name('Detail');
+fRing.add(ringParams, 'scaleMin', 0.005, 1.0, 0.005).name('Scale Min');
+fRing.add(ringParams, 'scaleMax', 0.005, 1.5, 0.005).name('Scale Max');
+fRing.add(ringParams, 'radialJitter', 0.0, 4.0, 0.01).name('Radial Jitter');
+fRing.add(ringParams, 'verticalJitter', 0.0, 4.0, 0.01).name('Vertical Jitter');
+fRing.add(ringParams, 'angleJitter', 0.0, 2.0, 0.01).name('Angle Jitter');
+fRing.add(ringParams, 'spinSpeedMin', 0.0, 10.0, 0.01).name('Spin Min');
+fRing.add(ringParams, 'spinSpeedMax', 0.0, 20.0, 0.01).name('Spin Max');
+fRing.add(ringParams, 'spawnDistance', 0.0, 10.0, 0.05).name('Spawn Dist');
 fRing.add(ringParams, 'fadeStart', 0.0, 0.95, 0.01).name('Fade Start');
 fRing.add(ringParams, 'fadeEnd', 0.05, 0.99, 0.01).name('Fade End');
 fRing.add(ringParams, 'growthDelay', 0.0, 0.9, 0.01).name('Growth Delay');
 fRing.add(ringParams, 'growthExponent', 0.1, 12.0, 0.1).name('Growth Expo');
-fRing.add({ spawn: () => shockRings.spawnAssembly() }, 'spawn').name('Spawn Assembly');
+fRing.addColor(ringParams, 'color').name('Color');
+fRing.add({ spawn: () => icoRings.spawnAssembly() }, 'spawn').name('Spawn Assembly');
 fRing.close();
 
 // Update loop with fixed-step physics
@@ -117,7 +121,7 @@ app.addUpdater((dt) => {
     controller.updateAfterPhysics();
     accumulator -= fixedStep;
   }
-  shockRings.update(dt);
+  icoRings.update(dt);
 });
 app.start();
 
